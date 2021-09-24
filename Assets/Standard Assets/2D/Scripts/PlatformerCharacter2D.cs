@@ -50,7 +50,7 @@ namespace UnityStandardAssets._2D
         }
 
 
-        public void Move(float move, bool crouch, bool jump)
+        public void Move(float move, float vertical, bool crouch, bool jump, bool floating)
         {
             // If crouching, check to see if the character can stand up
             if (!crouch && m_Anim.GetBool("Crouch"))
@@ -65,6 +65,9 @@ namespace UnityStandardAssets._2D
             // Set whether or not the character is crouching in the animator
             m_Anim.SetBool("Crouch", crouch);
 
+
+
+
             //only control the player if grounded or airControl is turned on
             if (m_Grounded || m_AirControl)
             {
@@ -73,10 +76,23 @@ namespace UnityStandardAssets._2D
 
                 // The Speed animator parameter is set to the absolute value of the horizontal input.
                 m_Anim.SetFloat("Speed", Mathf.Abs(move));
-
+                // If the player should float...
+                if(floating)
+                {
+                    Debug.Log("Floating");
+                m_Rigidbody2D.gravityScale = 0;
+                m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, vertical*m_MaxSpeed);
+                
+                }
+                else{
+                    Debug.Log("Not Floating");
+                //Reset gravity scale
+                m_Rigidbody2D.gravityScale = 3;
+                
                 // Move the character
                 m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
-
+                //m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, vertical*m_MaxSpeed);
+                }
                 // If the input is moving the player right and the player is facing left...
                 if (move > 0 && !m_FacingRight)
                 {
@@ -90,6 +106,7 @@ namespace UnityStandardAssets._2D
                     Flip();
                 }
             }
+
             // If the player should jump...
             if (m_Grounded && jump && m_Anim.GetBool("Ground"))
             {
@@ -97,6 +114,7 @@ namespace UnityStandardAssets._2D
                 m_Grounded = false;
                 m_Anim.SetBool("Ground", false);
                 m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+                
             }
         }
 
